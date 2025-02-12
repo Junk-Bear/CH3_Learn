@@ -19,21 +19,31 @@ private:
 	float NormalSpeed;
 	float SprintSpeed;
 	float StrintMultiplier;
-public:
-	ASpartaCharacter();
 
 public:	
-
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	USpringArmComponent* SpringArmComp;
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Camera")
 	UCameraComponent* CameraComp;
 
+	ASpartaCharacter();
+
+	UFUNCTION(BlueprintPure, Category = "Health")
+	float GetHealth() const;
+
+	UFUNCTION(BlueprintCallable, Category = "Health")
+	void AddHealth(float Amount);
 
 protected:
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+	float Health;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Health")
+	float MaxHealth;
+
 	virtual void SetupPlayerInputComponent(class UInputComponent*) override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	UFUNCTION()
 	void Move(const FInputActionValue& _Value);
@@ -48,4 +58,5 @@ protected:
 	UFUNCTION()
 	void StopSprint(const FInputActionValue& _Value);
 
+	void OnDeath();
 };
