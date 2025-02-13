@@ -34,7 +34,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Coin")
 	int32 CollectedCoinCount;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
 	float LevelDuration;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "Level")
@@ -47,6 +47,7 @@ public:
 	TArray<FName> LevelMapNames;
 
 	FTimerHandle LevelTimerHandle;
+	FTimerHandle HUD_UpdateTimerHandle;
 
 	ASpartaGameState();
 
@@ -56,5 +57,6 @@ public:
 	void OnLevelTimeUp();
 	void EndLevel();
 	void OnCoinCollected();
+	void UpdateHUD();
 
 };

@@ -5,6 +5,9 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/WidgetComponent.h"
+#include "SpartaGameState.h"
+#include "Components/TextBlock.h"
 
 ASpartaCharacter::ASpartaCharacter()
 {
@@ -16,6 +19,10 @@ ASpartaCharacter::ASpartaCharacter()
 	CameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComp"));
 	CameraComp->SetupAttachment(SpringArmComp, USpringArmComponent::SocketName);
 	CameraComp->bUsePawnControlRotation = false;
+
+	OverheadWidget = CreateDefaultSubobject<UWidgetComponent>(TEXT("OverheadWidget"));
+	OverheadWidget->SetupAttachment(GetMesh());
+	OverheadWidget->SetWidgetSpace(EWidgetSpace::Screen);
 
 	NormalSpeed = 300.f;
 	StrintMultiplier = 1.7f;
@@ -35,7 +42,7 @@ float ASpartaCharacter::GetHealth() const
 void ASpartaCharacter::AddHealth(float Amount)
 {
 	Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
-	UE_LOG(LogTemp, Warning, TEXT("Health increasee to : %f"), Health);
+	UpdateOverheadHP();
 }
 
 void ASpartaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -78,7 +85,7 @@ float ASpartaCharacter::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 	Health = FMath::Clamp(Health - DamageAmount, 0.0f, MaxHealth);
 
-	UE_LOG(LogTemp, Warning, TEXT("Health dereasee to : %f"), Health);
+	UpdateOverheadHP();
 
 	if (Health <= 0.0f)
 	{
@@ -149,5 +156,33 @@ void ASpartaCharacter::StopSprint(const FInputActionValue& _Value)
 
 void ASpartaCharacter::OnDeath()
 {
+	ASpartaGameState* SpartaGameInstance = GetWorld() ? GetWorld()->GetGameState<ASpartaGameState>() : nullptr;
+	if (SpartaGameInstance)
+	{
+		SpartaGameInstance->OnGameOver();
+	}
+}
+
+void ASpartaCharacter::UpdateOverheadHP()
+{
+	if (!OverheadWidget)
+		return;
+
+	UUserWidget* OverheadWidgetInstance = OverheadWidget->GetUserWidgetObject();
+
+	if (!OverheadWidgetInstance)
+		return;
+
+	if(UTextBlock* HPText = Cast<UTextBlock>(OverheadWidgetInstance->GetWidgetFromName(TEXT("OverheadHP"))))
+	{
+		HPText->SetText(FText::FromString(FString::Printf(TEXT("%.0f / %.0f"), Health, MaxHealth)));
+	}
+}
+
+void ASpartaCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UpdateOverheadHP();
 }
 

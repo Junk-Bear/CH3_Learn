@@ -3,6 +3,8 @@
 
 #include "BaseItem.h"
 #include "Components/SphereComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Particles/ParticleSystemComponent.h"
 
 // Sets default values
 ABaseItem::ABaseItem()
@@ -39,6 +41,37 @@ void ABaseItem::OnItemEndOverlap(UPrimitiveComponent* OverlapComp, AActor* Other
 
 void ABaseItem::ActivateItem(AActor* Activator)
 {
+	UParticleSystemComponent* ParticleSystem = nullptr;
+	if (PickupParticle)
+	{
+		ParticleSystem = UGameplayStatics::SpawnEmitterAtLocation(
+			GetWorld(),
+			PickupParticle,
+			GetActorLocation(),
+			GetActorRotation(),
+			true
+		);
+	}
+
+	if (PickupSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), PickupSound, GetActorLocation());
+	}
+
+	if (ParticleSystem)
+	{
+		FTimerHandle DestroyParticleTimerHandle;
+
+		GetWorld()->GetTimerManager().SetTimer(
+			DestroyParticleTimerHandle,
+			[ParticleSystem]()
+			{
+				ParticleSystem->DestroyComponent();
+			},
+			1.0f,
+			false
+		);
+	}
 }
 
 FName ABaseItem::GetItemName() const
