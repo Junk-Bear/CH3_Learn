@@ -8,6 +8,7 @@
 #include "Components/WidgetComponent.h"
 #include "SpartaGameState.h"
 #include "Components/TextBlock.h"
+#include "SpartaGameInstance.h"
 
 ASpartaCharacter::ASpartaCharacter()
 {
@@ -31,7 +32,19 @@ ASpartaCharacter::ASpartaCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 
 	MaxHealth = 100.0f;
-	Health = MaxHealth;
+
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(GameInstance);
+		if (SpartaGameInstance)
+		{
+			Health = SpartaGameInstance->CurrentHP;
+		}
+	}
+	else
+	{
+		Health = MaxHealth;
+	}
 }
 
 float ASpartaCharacter::GetHealth() const

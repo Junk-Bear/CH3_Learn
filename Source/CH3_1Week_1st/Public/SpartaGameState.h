@@ -52,8 +52,13 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Level")
 	TArray<FName> LevelMapNames;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Volume")
+	TArray<AActor*> SpawnItems;
+
 	FTimerHandle LevelTimerHandle;
 	FTimerHandle HUD_UpdateTimerHandle;
+
+	TArray<AActor*> FoundVolumes;
 
 	ASpartaGameState();
 

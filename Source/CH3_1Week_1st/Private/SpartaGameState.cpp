@@ -7,6 +7,7 @@
 #include "SpartaGameInstance.h"
 #include "CoinItem.h"
 #include "SpartaPlayerController.h"
+#include "spartaCharacter.h"
 #include "Components/TextBlock.h"
 #include "Blueprint/UserWidget.h"
 
@@ -83,7 +84,15 @@ void ASpartaGameState::StartLevel()
 	SpawnedCoinCount = 0;
 	CollectedCoinCount = 0;
 
-	TArray<AActor*> FoundVolumes;
+	for (AActor* SpawnItem : SpawnItems)
+	{
+		if (SpawnItem)
+		{
+			SpawnItem->Destroy();
+		}
+	}
+	SpawnItems.Empty();
+
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), ASpawnVolume::StaticClass(), FoundVolumes);
 
 	const int32 ItemToSpawn = 15 * CurrentWave;
@@ -99,6 +108,7 @@ void ASpartaGameState::StartLevel()
 				if (SpawnActor && SpawnActor->IsA(ACoinItem::StaticClass()))
 				{
 					SpawnedCoinCount++;
+					SpawnItems.Add(SpawnActor);
 				}
 			}
 		}
@@ -125,29 +135,36 @@ void ASpartaGameState::EndLevel()
 			AddScore(Score);
 			CurrentLevelIndex++;
 			SpartaGameInstance->CurrentLevelIndex = CurrentLevelIndex;
+
+			ASpartaCharacter* SpartaCharacter = Cast<ASpartaCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+			{
+				if (SpartaCharacter)
+				{
+					SpartaGameInstance->CurrentHP = SpartaCharacter->GetHealth();
+				}
+			}
 		}
-	}
 
-	if (CurrentLevelIndex > MaxLevels)
-	{
-		OnGameOver();
-		return;
-	}
+		if (CurrentLevelIndex > MaxLevels)
+		{
+			OnGameOver();
+			return;
+		}
 
-	if (LevelMapNames.IsValidIndex(CurrentLevelIndex))
-	{
-		UGameplayStatics::OpenLevel(GetWorld(), LevelMapNames[CurrentLevelIndex]);
-	}
-	else
-	{
-		OnGameOver();
+		if (LevelMapNames.IsValidIndex(CurrentLevelIndex))
+		{
+			UGameplayStatics::OpenLevel(GetWorld(), LevelMapNames[CurrentLevelIndex]);
+		}
+		else
+		{
+			OnGameOver();
+		}
 	}
 }
 
 void ASpartaGameState::EndWave()
 {
-
-	if (CurrentWave > MaxWaves)
+	if (CurrentWave >= MaxWaves)
 	{
 		EndLevel();
 	}
