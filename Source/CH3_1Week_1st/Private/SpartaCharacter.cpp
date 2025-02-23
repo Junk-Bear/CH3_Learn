@@ -32,19 +32,6 @@ ASpartaCharacter::ASpartaCharacter()
 	GetCharacterMovement()->MaxWalkSpeed = NormalSpeed;
 
 	MaxHealth = 100.0f;
-
-	if (UGameInstance* GameInstance = GetGameInstance())
-	{
-		USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(GameInstance);
-		if (SpartaGameInstance)
-		{
-			Health = SpartaGameInstance->CurrentHP;
-		}
-	}
-	else
-	{
-		Health = MaxHealth;
-	}
 }
 
 float ASpartaCharacter::GetHealth() const
@@ -56,6 +43,11 @@ void ASpartaCharacter::AddHealth(float Amount)
 {
 	Health = FMath::Clamp(Health + Amount, 0.0f, MaxHealth);
 	UpdateOverheadHP();
+}
+
+void ASpartaCharacter::SettingHealth(float Amount)
+{
+	Health = FMath::Clamp(Amount, 0.0f, MaxHealth);
 }
 
 void ASpartaCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

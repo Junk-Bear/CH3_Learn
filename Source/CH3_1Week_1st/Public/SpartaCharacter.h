@@ -37,6 +37,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = "Health")
 	void AddHealth(float Amount);
 
+	UFUNCTION(BlueprintAuthorityOnly, Category = "Health")
+	void SettingHealth(float Amount);
 
 	ASpartaCharacter();
 

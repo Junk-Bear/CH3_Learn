@@ -7,7 +7,7 @@
 #include "SpartaGameInstance.h"
 #include "CoinItem.h"
 #include "SpartaPlayerController.h"
-#include "spartaCharacter.h"
+#include "SpartaCharacter.h"
 #include "Components/TextBlock.h"
 #include "Blueprint/UserWidget.h"
 
@@ -78,6 +78,14 @@ void ASpartaGameState::StartLevel()
 		if (SpartaGameInstance)
 		{
 			CurrentLevelIndex = SpartaGameInstance->CurrentLevelIndex;
+
+			ASpartaCharacter* SpartaCharacter = Cast<ASpartaCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+			{
+				if (SpartaCharacter)
+				{
+					SpartaCharacter->SettingHealth(SpartaGameInstance->CurrentHP);
+				}
+			}
 		}
 	}
 
@@ -135,14 +143,6 @@ void ASpartaGameState::EndLevel()
 			AddScore(Score);
 			CurrentLevelIndex++;
 			SpartaGameInstance->CurrentLevelIndex = CurrentLevelIndex;
-
-			ASpartaCharacter* SpartaCharacter = Cast<ASpartaCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-			{
-				if (SpartaCharacter)
-				{
-					SpartaGameInstance->CurrentHP = SpartaCharacter->GetHealth();
-				}
-			}
 		}
 
 		if (CurrentLevelIndex > MaxLevels)
@@ -164,6 +164,21 @@ void ASpartaGameState::EndLevel()
 
 void ASpartaGameState::EndWave()
 {
+	if (UGameInstance* GameInstance = GetGameInstance())
+	{
+		USpartaGameInstance* SpartaGameInstance = Cast<USpartaGameInstance>(GameInstance);
+		if (SpartaGameInstance)
+		{
+			ASpartaCharacter* SpartaCharacter = Cast<ASpartaCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+			{
+				if (SpartaCharacter)
+				{
+					SpartaGameInstance->CurrentHP = SpartaCharacter->GetHealth();
+				}
+			}
+		}
+	}
+
 	if (CurrentWave >= MaxWaves)
 	{
 		EndLevel();
